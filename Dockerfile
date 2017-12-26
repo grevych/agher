@@ -1,32 +1,47 @@
 FROM ubuntu:16.04
 
-# Ubuntu sides with libav, I side with ffmpeg.
-# run    echo "deb http://ppa.launchpad.net/jon-severinsson/ffmpeg/ubuntu quantal main" >> /etc/apt/sources.list
-# run    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1DB8ADC1CFCA9579
+
+ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LC_CTYPE=en_US.UTF-8
+ENV LANG=en_US.UTF-8
 
 RUN apt-get update
 RUN apt-get install -y -q wget curl
-RUN apt-get install -y -q build-essential
-RUN apt-get install -y -q cmake
-RUN apt-get install -y -q git pkg-config
+RUN apt-get install -y -q build-essential cmake
+RUN apt-get install -y -q git pkg-config vim
 RUN apt-get install -y -q libavformat-dev libavcodec-dev libavfilter-dev libswscale-dev
 RUN apt-get install -y -q libjpeg-dev libpng-dev libtiff-dev libjasper-dev zlib1g-dev libopenexr-dev libxine2-dev libeigen3-dev libtbb-dev
-RUN apt-get install -y -q python3.5 python3.5-dev
-RUN apt-get install -y -q python3-pip
-RUN pip3 install numpy
-# add    build_opencv.sh    /build_opencv.sh
-# run    /bin/sh /build_opencv.sh
-# run    rm -rf /build_opencv.sh
 
-COPY ./build_opencv.sh /build_opencv.sh
-RUN /bin/bash build_opencv.sh
 
-COPY ./install_anaconda.sh /install_anaconda.sh
-RUN /bin/bash install_anaconda.sh agher
+SHELL ["/bin/bash", "-c"]
+RUN mkdir -p /usr/local/object_detection
+WORKDIR /usr/local/object_detection
 
-COPY ./run.sh /run.sh
-RUN chmod u+x /run.sh
+RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
+    wget --quiet https://repo.continuum.io/miniconda/Miniconda3-3.7.0-Linux-x86_64.sh -O miniconda.sh && \
+    chmod u+x miniconda.sh && ./miniconda.sh -b -p /opt/conda && \
+    rm miniconda.sh
 
-CMD ["/bin/bash", "-c", "./run.sh", "agher"]
+ENV PATH /opt/conda/bin:$PATH
+
+# RUN echo "${PATH}"
+# ENV PATH="${HOME}/miniconda/bin:${PATH}"
+# RUN ls "${HOME}/miniconda/bin"
+# RUN echo "${PATH}"
+# RUN source "${HOME}/miniconda/bin/activate" agher
+
+RUN conda create --name agher python=3.5
+RUN conda install --name agher -c menpo opencv
+RUN conda install --name agher jupyter setuptools pip
+
+COPY ./clone_repos.sh /usr/local/object_detection/
+RUN chmod u+x /usr/local/object_detection/clone_repos.sh
+RUN source /opt/conda/bin/activate agher && ./clone_repos.sh
+
+COPY ./run.sh /usr/local/object_detection/
+RUN chmod u+x ./run.sh
+
+CMD ["/bin/bash", "run.sh"]
 
 
