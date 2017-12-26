@@ -3,11 +3,12 @@
 pip install git+https://github.com/broadinstitute/keras-resnet
 
 # Install keras-retinanet
-git clone https://github.com/fizyr/keras-retinanet.git
-cd keras-retinanet
-python setup.py install
+git clone https://github.com/fizyr/keras-retinanet.git keras_retinanet
+cd keras_retinanet
+touch __init__.py
+# python setup.py install
 cd ..
-rm -r keras_retinanet
+
 
 git clone https://github.com/DiegoAgher/object-detection.git
 cd object-detection

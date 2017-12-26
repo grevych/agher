@@ -32,12 +32,12 @@ ENV PATH /opt/conda/bin:$PATH
 # RUN source "${HOME}/miniconda/bin/activate" agher
 
 RUN conda create --name agher python=3.5
-RUN conda install --name agher -c menpo opencv
-RUN conda install --name agher jupyter setuptools pip
+RUN conda install --name agher -c menpo opencv tensorflow jupyter setuptools pip
 
 COPY ./clone_repos.sh /usr/local/object_detection/
 RUN chmod u+x /usr/local/object_detection/clone_repos.sh
 RUN source /opt/conda/bin/activate agher && ./clone_repos.sh
+ENV PYTHONPATH=/usr/local/object_detection:$PYTHONPATH
 
 COPY ./run.sh /usr/local/object_detection/
 RUN chmod u+x ./run.sh
